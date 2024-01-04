@@ -11,6 +11,7 @@ const GenerateFormSchema = new Schema({
   feedback_parameters: [
     { type: Schema.Types.ObjectId, ref: "FeedbackParameter" },
   ],
+  responses: [],
   reviewer: [{ type: Schema.Types.ObjectId, ref: "UserTable" }],
   reviewerEmails: String,
 });

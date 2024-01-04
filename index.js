@@ -9,6 +9,7 @@ const usersTableRouter = require("./src/routes/users-table");
 const rolesTableRouter = require("./src/routes/roles-table");
 const generateFormRouter = require("./src/routes/generate-form");
 const adminAuthRouters = require("./src/routes/admin-auth");
+const userAuthRouters = require("./src/routes/user-auth");
 
 // const adminRouter = require("./src/routes/feedback-parameters");
 
@@ -23,6 +24,7 @@ const { userTableRouters } = usersTableRouter;
 const { roleTableRouters } = rolesTableRouter;
 const { generateFormRouters } = generateFormRouter;
 const { adminAuthTableRouters } = adminAuthRouters;
+const { userAuthTableRouters } = userAuthRouters;
 
 //middleware
 const authMiddleware = (req, res, next) => {
@@ -45,10 +47,13 @@ const authMiddleware = (req, res, next) => {
 
 //API's
 app.use("/feedback-parameters", authMiddleware, feedbackParameterRouter);
-app.use("/users", authMiddleware, userTableRouters);
 app.use("/roles", authMiddleware, roleTableRouters);
-app.use("/feedback-form", authMiddleware, generateFormRouters);
+app.use("/feedback-form", generateFormRouters);
+app.use("/users", userTableRouters);
+// app.use("/users", authMiddleware, userTableRouters);
+// app.use("/feedback-form", authMiddleware, generateFormRouters);
 app.use("/auth", adminAuthTableRouters);
+app.use("/", userAuthTableRouters);
 
 // app.use("/admin/login", adminRouter.adminRouters);
 

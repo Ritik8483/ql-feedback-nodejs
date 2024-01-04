@@ -2,6 +2,11 @@ const loginAdminUserCodes = {
   loginAdminCode: 4000,
 };
 
+const loginUserAuthCodes = {
+  loginUserCode: 4001,
+  signupUserCode: 4002,
+};
+
 const feedbackParameterCodes = {
   addFeedbackCode: 3000,
   getAllFeedbacksCode: 3001,
@@ -39,5 +44,6 @@ module.exports = {
   feedbackParameterCodes,
   usersCodes,
   rolesCodes,
-  generateFeedbackFormCodes
+  generateFeedbackFormCodes,
+  loginUserAuthCodes,
 };
