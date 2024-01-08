@@ -7,6 +7,8 @@ const loginUserAuthMsg = {
   loginUserMsg: "User logged in successfully",
 };
 
+const sendEmailMsg = "Email sent sccessfully!"
+
 const feedbackParameterMsg = {
   addFeedbackMsg: "Feedback Parameter added successfully",
   getAllFeedbacksMsg: "Feedback Parameter list",
@@ -46,4 +48,5 @@ module.exports = {
   rolesMsg,
   generateFeedbackFormMsg,
   loginUserAuthMsg,
+  sendEmailMsg
 };

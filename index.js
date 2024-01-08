@@ -10,6 +10,7 @@ const rolesTableRouter = require("./src/routes/roles-table");
 const generateFormRouter = require("./src/routes/generate-form");
 const adminAuthRouters = require("./src/routes/admin-auth");
 const userAuthRouters = require("./src/routes/user-auth");
+const sendEmail = require("./src/controller/sendEmail");
 
 // const adminRouter = require("./src/routes/feedback-parameters");
 
@@ -46,6 +47,7 @@ const authMiddleware = (req, res, next) => {
 };
 
 //API's
+app.post("/send", authMiddleware, sendEmail);
 app.use("/feedback-parameters", authMiddleware, feedbackParameterRouter);
 app.use("/roles", authMiddleware, roleTableRouters);
 app.use("/feedback-form", generateFormRouters);
