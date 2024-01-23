@@ -2,16 +2,7 @@ const userModel = require("../model/admin-auth");
 const jwt = require("jsonwebtoken");
 const AdminAuth = userModel.AdminAuth;
 const bcrypt = require("bcrypt");
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-
-const {
-  loginAdminUserCodes: { loginAdminCode },
-} = codes;
-
-const {
-  loginAdminUserMsg: { loginAdminMsg },
-} = messages;
+const { responder } = require("../responder/responder");
 
 exports.createUser = async (req, res) => {
   try {
@@ -36,11 +27,7 @@ exports.loginUser = async (req, res) => {
       const token = jwt.sign({ email: req.body.email }, "shhhhh"); //generating a new token using email
       userResp.token = token;
       const finalResponse = await userResp.save();
-      res.status(201).json({
-        code: loginAdminCode,
-        data: { token: token },
-        message: loginAdminMsg,
-      });
+      responder(res, 4000, { token: token });
     } else {
       res.sendStatus(401);
     }

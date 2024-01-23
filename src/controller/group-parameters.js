@@ -1,38 +1,13 @@
 const FeedbackGroupSchema = require("../model/group-parameters");
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
 const GroupParameter = FeedbackGroupSchema.GroupParameter;
-
-const {
-  groupFeedbackCodes: {
-    addGroupFeedbackCode,
-    getAllGroupFeedbackCode,
-    getSingleGroupFeedbackCode,
-    updateGroupFeedbackCode,
-    deleteGroupFeedbackCode,
-  },
-} = codes;
-
-const {
-  groupFeedbackMsg: {
-    addGroupFeedbackMsg,
-    getAllGroupFeedbackMsg,
-    getSingleGroupFeedbackMsg,
-    updateGroupFeedbackMsg,
-    deleteGroupFeedbackMsg,
-  },
-} = messages;
+const { responder } = require("../responder/responder");
 
 exports.addFeedbackGroup = async (req, res) => {
   try {
     const resp = new GroupParameter(req.body);
     const finalResp = await resp.save();
     if (finalResp.id) {
-      res.status(200).json({
-        code: addGroupFeedbackCode,
-        data: {},
-        message: addGroupFeedbackMsg,
-      });
+      responder(res, 3021, {});
     }
   } catch (error) {
     if (error.code === 11000) {
@@ -61,31 +36,21 @@ exports.getAllFeedbackGroup = async (req, res) => {
       const resp = await GroupParameter.find()
         .populate("groupFeedbacks")
         .sort({ _id: -1 })
-        .skip(limit * (pageNumber - 1)) 
+        .skip(limit * (pageNumber - 1))
         .limit(limit)
         .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllGroupFeedbackCode,
-          data: resp,
-          message: getAllGroupFeedbackMsg,
-          total: totalFeedbackParameters,
-        });
+        responder(res, 3022, resp, totalFeedbackParameters);
       }
     } else {
       const resp = await GroupParameter.find({ feedbackGroupName: searchRegEx })
-      .populate("groupFeedbacks")
+        .populate("groupFeedbacks")
         .sort({ _id: -1 })
         .skip(limit * (pageNumber - 1))
         .limit(limit)
         .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllGroupFeedbackCode,
-          data: resp,
-          message: getAllGroupFeedbackMsg,
-          total: totalSearchFeedbacks,
-        });
+        responder(res, 3022, resp, totalSearchFeedbacks);
       }
     }
   } catch (error) {
@@ -97,13 +62,11 @@ exports.getAllFeedbackGroup = async (req, res) => {
 exports.getSingleFeedbackGroup = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await GroupParameter.findById(id).select("-__v -createdAt -updatedAt");
+    const resp = await GroupParameter.findById(id).select(
+      "-__v -createdAt -updatedAt"
+    );
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: getSingleGroupFeedbackCode,
-        data: resp,
-        message: getSingleGroupFeedbackMsg,
-      });
+      responder(res, 3023, resp);
     }
   } catch (error) {
     console.log("error");
@@ -116,11 +79,7 @@ exports.updateFeedbackGroup = async (req, res) => {
   try {
     const resp = await GroupParameter.findOneAndUpdate({ _id: id }, req.body);
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: updateGroupFeedbackCode,
-        data: {},
-        message: updateGroupFeedbackMsg,
-      });
+      responder(res, 3024, {});
     }
   } catch (error) {
     if (error.code === 11000) {
@@ -144,11 +103,7 @@ exports.deleteFeedbackGroup = async (req, res) => {
         .status(400)
         .json({ error: "Feedback Parameter group already deleted" });
     } else if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: deleteGroupFeedbackCode,
-        data: {},
-        message: deleteGroupFeedbackMsg,
-      });
+      responder(res, 3025, {});
     }
   } catch (error) {
     console.log("error", error);

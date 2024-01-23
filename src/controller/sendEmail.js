@@ -1,9 +1,5 @@
 const nodemailer = require("nodemailer");
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-
-const { sendEmailCode } = codes;
-const { sendEmailMsg } = messages;
+const { responder } = require("../responder/responder");
 
 const sendEmail = async (req, res) => {
   const transporter = nodemailer.createTransport({
@@ -29,10 +25,7 @@ const sendEmail = async (req, res) => {
     html: `<a href=${req.body.emailUrl} >${req.body.emailUrl}</a>`, // html body
   });
   if (info?.messageId) {
-    res.json({
-      code: sendEmailCode,
-      message: sendEmailMsg,
-    });
+    responder(res, 5000, {});
   } else {
     res.status(400).json(error);
   }

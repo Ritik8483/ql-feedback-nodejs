@@ -1,37 +1,12 @@
 const RoleTableModel = require("../model/roles-table");
 const RoleTable = RoleTableModel.RoleTable;
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-
-const {
-  rolesCodes: {
-    addRoleCode,
-    getAllRolesCode,
-    getSingleRoleCode,
-    updateRoleCode,
-    deleteRoleCode,
-  },
-} = codes;
-
-const {
-  rolesMsg: {
-    addRoleMsg,
-    getAllRolesMsg,
-    getSingleRoleMsg,
-    updateRoleMsg,
-    deleteRoleMsg,
-  },
-} = messages;
+const { responder } = require("../responder/responder");
 
 exports.addRoles = async (req, res) => {
   try {
     const resp = await new RoleTable(req.body).save();
     if (resp.id) {
-      res.status(200).json({
-        code: addRoleCode,
-        data: {},
-        message: addRoleMsg,
-      });
+      responder(res, 3011, {});
     }
   } catch (error) {
     console.log("error", error);
@@ -66,12 +41,7 @@ exports.getAllRoles = async (req, res) => {
         .limit(limit)
         .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllRolesCode,
-          data: resp,
-          message: getAllRolesMsg,
-          total: totalRoles,
-        });
+        responder(res, 3012, resp, totalRoles);
       }
     } else {
       const resp = await RoleTable.find({
@@ -83,12 +53,7 @@ exports.getAllRoles = async (req, res) => {
         .limit(limit)
         .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllRolesCode,
-          data: resp,
-          message: getAllRolesMsg,
-          total: totalSearchRoles,
-        });
+        responder(res, 3012, resp, totalSearchRoles);
       }
     }
   } catch (error) {
@@ -100,13 +65,11 @@ exports.getAllRoles = async (req, res) => {
 exports.getSingleRole = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await RoleTable.findById(id).select("-__v -createdAt -updatedAt");
+    const resp = await RoleTable.findById(id).select(
+      "-__v -createdAt -updatedAt"
+    );
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: getSingleRoleCode,
-        data: resp,
-        message: getSingleRoleMsg,
-      });
+      responder(res, 3013, resp);
     }
   } catch (error) {
     console.log("error");
@@ -119,11 +82,7 @@ exports.updateRole = async (req, res) => {
   try {
     const resp = await RoleTable.findOneAndUpdate({ _id: id }, req.body);
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: updateRoleCode,
-        data: {},
-        message: updateRoleMsg,
-      });
+      responder(res, 3014, {});
     }
   } catch (error) {
     if (error.code === 11000) {
@@ -147,11 +106,7 @@ exports.deleteRole = async (req, res) => {
     if (!resp) {
       res.status(400).json({ error: "Role already deleted" });
     } else if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: deleteRoleCode,
-        data: {},
-        message: deleteRoleMsg,
-      });
+      responder(res, 3015, {});
     }
   } catch (error) {
     console.log("error", error);

@@ -3,16 +3,7 @@ const userModel = require("../model/user-auth");
 const jwt = require("jsonwebtoken");
 const UserAuth = userModel.UserAuth;
 const bcrypt = require("bcrypt");
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-
-const {
-  loginUserAuthCodes: { loginUserCode, signupUserCode },
-} = codes;
-
-const {
-  loginUserAuthMsg: { loginUserMsg, signupUserMsg },
-} = messages;
+const { responder } = require("../responder/responder");
 
 exports.createUser = async (req, res) => {
   try {
@@ -22,10 +13,7 @@ exports.createUser = async (req, res) => {
     user.token = token;
     user.password = hash;
     const resp = await user.save();
-    res.status(201).json({
-      code: signupUserCode,
-      message: signupUserMsg,
-    });
+    responder(res, 4002, {});
   } catch (error) {
     if (error.code === 11000) {
       console.log("error", error);
@@ -47,11 +35,7 @@ exports.loginUser = async (req, res) => {
       const token = jwt.sign({ email: req.body.email }, "shhhhh"); //generating a new token using email
       userResp.token = token;
       const finalResponse = await userResp.save();
-      res.status(201).json({
-        code: loginUserCode,
-        data: { token: token },
-        message: loginUserMsg,
-      });
+      responder(res, 4001, { token: token });
     } else {
       res.sendStatus(401);
     }

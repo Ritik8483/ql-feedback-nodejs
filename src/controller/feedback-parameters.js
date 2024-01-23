@@ -1,38 +1,17 @@
-const FeedbackParametersSchema = require("../model/feedback-parameters");
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-const FeedbackParameter = FeedbackParametersSchema.FeedbackParameter;
-
 const {
-  feedbackParameterCodes: {
-    addFeedbackCode,
-    getAllFeedbacksCode,
-    getSingleFeedbackCode,
-    updateFeedbackCode,
-    deleteFeedbackCode,
-  },
-} = codes;
-
-const {
-  feedbackParameterMsg: {
-    addFeedbackMsg,
-    getAllFeedbacksMsg,
-    getSingleFeedbackMsg,
-    updateFeedbackMsg,
-    deleteFeedbackMsg,
-  },
-} = messages;
+  createItem,
+  getAllItems,
+  getSingleItem,
+  updateItem,
+  deleteItem
+} = require("../services/feedback-parameters");
+const { responder } = require("../responder/responder");
 
 exports.addFeedbackParameters = async (req, res) => {
   try {
-    const resp = new FeedbackParameter(req.body);
-    const finalResp = await resp.save();
+    const finalResp = await createItem(req.body);
     if (finalResp.id) {
-      res.status(200).json({
-        code: addFeedbackCode,
-        data: {},
-        message: addFeedbackMsg,
-      });
+      responder(res, 3001, {});
     }
   } catch (error) {
     if (error.code === 11000) {
@@ -52,39 +31,16 @@ exports.getAllFeedbackParameters = async (req, res) => {
   const pageNumber = +req.query.page;
   const searchRegEx = new RegExp(req.query.search, "i");
   try {
-    const totalFeedbackParameters =
-      await FeedbackParameter.find().countDocuments();
-    const totalSearchFeedbacks = await FeedbackParameter.find({
-      feedbackName: searchRegEx,
-    }).countDocuments();
-    if (!req.query.search) {
-      const resp = await FeedbackParameter.find()
-        .sort({ _id: -1 })
-        .skip(limit * (pageNumber - 1))
-        .limit(limit)
-        .select("-__v -createdAt -updatedAt");
-      if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllFeedbacksCode,
-          data: resp,
-          message: getAllFeedbacksMsg,
-          total: totalFeedbackParameters,
-        });
-      }
-    } else {
-      const resp = await FeedbackParameter.find({ feedbackName: searchRegEx })
-        .sort({ _id: -1 })
-        .skip(limit * (pageNumber - 1))
-        .limit(limit)
-        .select("-__v -createdAt -updatedAt");
-      if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllFeedbacksCode,
-          data: resp,
-          message: getAllFeedbacksMsg,
-          total: totalSearchFeedbacks,
-        });
-      }
+    const resp = await getAllItems(limit, pageNumber, req.query.search, searchRegEx);
+    if (Array.isArray(resp.resp)) {
+      responder(
+        res,
+        3002,
+        resp.resp,
+        Object.keys(resp).includes("totalFeedbackParameters")
+          ? resp.totalFeedbackParameters
+          : resp.totalSearchFeedbacks
+      );
     }
   } catch (error) {
     console.log("error");
@@ -95,15 +51,9 @@ exports.getAllFeedbackParameters = async (req, res) => {
 exports.getSingleFeedbackParameter = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await FeedbackParameter.findById(id).select(
-      "-__v -createdAt -updatedAt"
-    );
+    const resp = await getSingleItem(id);
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: getSingleFeedbackCode,
-        data: resp,
-        message: getSingleFeedbackMsg,
-      });
+      responder(res, 3003, resp);
     }
   } catch (error) {
     console.log("error");
@@ -114,16 +64,9 @@ exports.getSingleFeedbackParameter = async (req, res) => {
 exports.updateFeedbackParameters = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await FeedbackParameter.findOneAndUpdate(
-      { _id: id },
-      req.body
-    );
+    const resp =await updateItem(id, req.body);
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: updateFeedbackCode,
-        data: {},
-        message: updateFeedbackMsg,
-      });
+      responder(res, 3004, {});
     }
   } catch (error) {
     if (error.code === 11000) {
@@ -141,15 +84,11 @@ exports.updateFeedbackParameters = async (req, res) => {
 exports.deleteFeedbackParameters = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await FeedbackParameter.findOneAndDelete({ _id: id });
+    const resp = await deleteItem(id)
     if (!resp) {
       res.status(400).json({ error: "Feedback Parameter already deleted" });
     } else if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: deleteFeedbackCode,
-        data: {},
-        message: deleteFeedbackMsg,
-      });
+      responder(res, 3005, {});
     }
   } catch (error) {
     console.log("error", error);

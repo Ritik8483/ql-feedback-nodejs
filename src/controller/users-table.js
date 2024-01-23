@@ -1,33 +1,13 @@
 const UserTableModel = require("../model/users-table");
 const UserTable = UserTableModel.UserTable;
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-
-const {
-  usersCodes: {
-    addUserCode,
-    getAllUsersCode,
-    getSingleUserCode,
-    updateUserCode,
-    deleteUserCode,
-  },
-} = codes;
-
-const {
-  usersMsg: {
-    addUserMsg,
-    getAllUsersMsg,
-    getSingleUserMsg,
-    updateUserMsg,
-    deleteUserMsg,
-  },
-} = messages;
+const { responder } = require("../responder/responder");
 
 exports.addUsers = async (req, res) => {
   console.log(req.body);
   try {
     const resp = await new UserTable(req.body).save();
     if (resp.id) {
+      responder(res, 3006, {});
       res.status(200).json({
         code: addUserCode,
         data: {},
@@ -64,12 +44,7 @@ exports.getAllUsers = async (req, res) => {
         .limit(limit)
         .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllUsersCode,
-          data: resp,
-          message: getAllUsersMsg,
-          total: totalUsers,
-        });
+        responder(res, 3007, resp, totalUsers);
       }
     } else {
       const resp = await UserTable.find({
@@ -80,12 +55,7 @@ exports.getAllUsers = async (req, res) => {
         .limit(limit)
         .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllUsersCode,
-          data: resp,
-          message: getAllUsersMsg,
-          total: totalSearchUsers,
-        });
+        responder(res, 3007, resp, totalSearchUsers);
       }
     }
   } catch (error) {
@@ -97,13 +67,11 @@ exports.getAllUsers = async (req, res) => {
 exports.getSingleUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await UserTable.findById(id).select("-__v -createdAt -updatedAt");
+    const resp = await UserTable.findById(id).select(
+      "-__v -createdAt -updatedAt"
+    );
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: getSingleUserCode,
-        data: resp,
-        message: getSingleUserMsg,
-      });
+      responder(res, 3008, resp);
     }
   } catch (error) {
     console.log("error");
@@ -116,11 +84,7 @@ exports.updateUsers = async (req, res) => {
   try {
     const resp = await UserTable.findOneAndUpdate({ _id: id }, req.body);
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: updateUserCode,
-        data: {},
-        message: updateUserMsg,
-      });
+      responder(res, 3009, {});
     }
   } catch (error) {
     if (error.code === 11000) {
@@ -142,11 +106,7 @@ exports.deleteUsers = async (req, res) => {
     if (!resp) {
       res.status(400).json({ error: "User already deleted" });
     } else if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: deleteUserCode,
-        data: {},
-        message: deleteUserMsg,
-      });
+      responder(res, 3010, {});
     }
   } catch (error) {
     console.log("error", error);

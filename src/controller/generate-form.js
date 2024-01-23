@@ -1,37 +1,12 @@
 const GenerateFormModel = require("../model/generate-form");
 const GenerateFormTable = GenerateFormModel.GenerateFormTable;
-const codes = require("../constant/code");
-const messages = require("../constant/messages");
-
-const {
-  generateFeedbackFormCodes: {
-    addFeedbackFormCode,
-    getAllFeedbackFormCode,
-    getSingleFeedbackFormCode,
-    updateFeedbackFormCode,
-    deleteFeedbackFormCode,
-  },
-} = codes;
-
-const {
-  generateFeedbackFormMsg: {
-    addFeedbackFormMsg,
-    getAllFeedbackFormMsg,
-    getSingleFeedbackFormMsg,
-    updateFeedbackFormMsg,
-    deleteFeedbackFormMsg,
-  },
-} = messages;
+const { responder } = require("../responder/responder");
 
 exports.addFeedbackForm = async (req, res) => {
   try {
     const resp = await new GenerateFormTable(req.body).save();
     if (resp.id) {
-      res.status(200).json({
-        code: addFeedbackFormCode,
-        data: {},
-        message: addFeedbackFormMsg,
-      });
+      responder(res, 3016, {});
     }
   } catch (error) {
     console.log("error", error);
@@ -49,7 +24,6 @@ exports.getAllFeedbackForm = async (req, res) => {
       $or: [{ feedbackName: searchRegEx }, { feedback_type: searchRegEx }],
     }).countDocuments();
     if (!req.query.search) {
-      // const totalFeedbackForm = await GenerateFormTable.find().countDocuments();
       const resp = await GenerateFormTable.find()
         .sort({ _id: -1 })
         .populate("feedback_parameters")
@@ -59,12 +33,7 @@ exports.getAllFeedbackForm = async (req, res) => {
         .limit(limit)
         .select("-__v -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllFeedbackFormCode,
-          data: resp,
-          message: getAllFeedbackFormMsg,
-          total: totalFeedbackForm,
-        });
+        responder(res, 3017, resp, totalFeedbackForm);
       }
     } else {
       const resp = await GenerateFormTable.find({
@@ -78,12 +47,7 @@ exports.getAllFeedbackForm = async (req, res) => {
         .limit(limit)
         .select("-__v -updatedAt");
       if (Array.isArray(resp)) {
-        res.status(200).json({
-          code: getAllFeedbackFormCode,
-          data: resp,
-          message: getAllFeedbackFormMsg,
-          total: totalSearchRoles,
-        });
+        responder(res, 3017, resp, totalSearchRoles);
       }
     }
   } catch (error) {
@@ -101,11 +65,7 @@ exports.getSingleFeedbackForm = async (req, res) => {
       .populate("review")
       .select("-__v -updatedAt");
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: getSingleFeedbackFormCode,
-        data: resp,
-        message: getSingleFeedbackFormMsg,
-      });
+      responder(res, 3018, resp);
     }
   } catch (error) {
     console.log("error");
@@ -121,11 +81,7 @@ exports.updateFeedbackForm = async (req, res) => {
       req.body
     );
     if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: updateFeedbackFormCode,
-        data: {},
-        message: updateFeedbackFormMsg,
-      });
+      responder(res, 3019, {});
     }
   } catch (error) {
     console.log("error", error);
@@ -140,11 +96,7 @@ exports.deleteFeedbackForm = async (req, res) => {
     if (!resp) {
       res.status(400).json({ error: "Feedback Form already deleted" });
     } else if (Object.keys(resp).length) {
-      res.status(200).json({
-        code: deleteFeedbackFormCode,
-        data: {},
-        message: deleteFeedbackFormMsg,
-      });
+      responder(res, 3020, {});
     }
   } catch (error) {
     console.log("error", error);
