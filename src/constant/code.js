@@ -7,7 +7,7 @@ const loginUserAuthCodes = {
   signupUserCode: 4002,
 };
 
-const sendEmailCode = 5000
+const sendEmailCode = 5000;
 
 const feedbackParameterCodes = {
   addFeedbackCode: 3000,
@@ -41,6 +41,14 @@ const generateFeedbackFormCodes = {
   deleteFeedbackFormCode: 3020,
 };
 
+const groupFeedbackCodes = {
+  addGroupFeedbackCode: 3021,
+  getAllGroupFeedbackCode: 3022,
+  getSingleGroupFeedbackCode: 3023,
+  updateGroupFeedbackCode: 3024,
+  deleteGroupFeedbackCode: 3025,
+};
+
 module.exports = {
   loginAdminUserCodes,
   feedbackParameterCodes,
@@ -48,5 +56,6 @@ module.exports = {
   rolesCodes,
   generateFeedbackFormCodes,
   loginUserAuthCodes,
-  sendEmailCode
+  sendEmailCode,
+  groupFeedbackCodes,
 };

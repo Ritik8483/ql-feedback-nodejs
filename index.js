@@ -10,6 +10,7 @@ const rolesTableRouter = require("./src/routes/roles-table");
 const generateFormRouter = require("./src/routes/generate-form");
 const adminAuthRouters = require("./src/routes/admin-auth");
 const userAuthRouters = require("./src/routes/user-auth");
+const groupParameterRouters = require("./src/routes/group-parameters");
 const sendEmail = require("./src/controller/sendEmail");
 
 // const adminRouter = require("./src/routes/feedback-parameters");
@@ -26,11 +27,11 @@ const { roleTableRouters } = rolesTableRouter;
 const { generateFormRouters } = generateFormRouter;
 const { adminAuthTableRouters } = adminAuthRouters;
 const { userAuthTableRouters } = userAuthRouters;
+const { groupParameterRouter } = groupParameterRouters;
 
 //middleware
 const authMiddleware = (req, res, next) => {
   //method of initializing middleware
-  console.log(req.get("Authorization"));
   const token = req.get("Authorization"); //as log contains = Bearer eyJhbGciOiJ
   try {
     const decoded = jwt.verify(token, "shhhhh"); //log gives { email: 'vats@gmail.com', iat: 1702471866 }
@@ -51,6 +52,7 @@ app.post("/send", authMiddleware, sendEmail);
 app.use("/feedback-parameters", authMiddleware, feedbackParameterRouter);
 app.use("/roles", authMiddleware, roleTableRouters);
 app.use("/feedback-form", generateFormRouters);
+app.use("/group-parameters", groupParameterRouter);
 app.use("/users", userTableRouters);
 // app.use("/users", authMiddleware, userTableRouters);
 // app.use("/feedback-form", authMiddleware, generateFormRouters);

@@ -7,9 +7,10 @@ const FeedbackParametersSchema = Schema({
     required: [true, "Feedback Name is required"],
     unique: true,
   },
+  mcqOption: [],
   feedbackDescription: {
     type: String,
-    required: [true, "Feedback Description is required"],
+    // required: [true, "Feedback Description is required"],
   },
   feedback_parameter_type: {
     type: String,

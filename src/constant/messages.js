@@ -7,7 +7,7 @@ const loginUserAuthMsg = {
   loginUserMsg: "User logged in successfully",
 };
 
-const sendEmailMsg = "Email sent sccessfully!"
+const sendEmailMsg = "Email sent sccessfully!";
 
 const feedbackParameterMsg = {
   addFeedbackMsg: "Feedback Parameter added successfully",
@@ -41,6 +41,14 @@ const generateFeedbackFormMsg = {
   deleteFeedbackFormMsg: "Feedback form deleted successfully",
 };
 
+const groupFeedbackMsg = {
+  addGroupFeedbackMsg: "Feedback form group created successfully",
+  getAllGroupFeedbackMsg: "Feedback form group list",
+  getSingleGroupFeedbackMsg: "Feedback form group detail",
+  updateGroupFeedbackMsg: "Feedback form group updated successfully",
+  deleteGroupFeedbackMsg: "Feedback form group deleted successfully",
+};
+
 module.exports = {
   loginAdminUserMsg,
   feedbackParameterMsg,
@@ -48,5 +56,6 @@ module.exports = {
   rolesMsg,
   generateFeedbackFormMsg,
   loginUserAuthMsg,
-  sendEmailMsg
+  sendEmailMsg,
+  groupFeedbackMsg
 };

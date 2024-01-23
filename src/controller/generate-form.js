@@ -42,79 +42,55 @@ exports.addFeedbackForm = async (req, res) => {
 exports.getAllFeedbackForm = async (req, res) => {
   const limit = +req.query.limit;
   const pageNumber = +req.query.page;
+  const searchRegEx = new RegExp(req.query.search, "i");
   try {
     const totalFeedbackForm = await GenerateFormTable.find().countDocuments();
-    const resp = await GenerateFormTable.find()
-      .sort({ _id: -1 })
-      .populate("feedback_parameters")
-      .populate("reviewer")
-      .populate("review")
-      .skip(limit * (pageNumber - 1))
-      .limit(limit)
-      .select("-__v");
-    if (Array.isArray(resp)) {
-      res.status(200).json({
-        code: getAllFeedbackFormCode,
-        data: resp,
-        message: getAllFeedbackFormMsg,
-        total: totalFeedbackForm,
-      });
+    const totalSearchRoles = await GenerateFormTable.find({
+      $or: [{ feedbackName: searchRegEx }, { feedback_type: searchRegEx }],
+    }).countDocuments();
+    if (!req.query.search) {
+      // const totalFeedbackForm = await GenerateFormTable.find().countDocuments();
+      const resp = await GenerateFormTable.find()
+        .sort({ _id: -1 })
+        .populate("feedback_parameters")
+        .populate("reviewer")
+        .populate("review")
+        .skip(limit * (pageNumber - 1))
+        .limit(limit)
+        .select("-__v");
+      if (Array.isArray(resp)) {
+        res.status(200).json({
+          code: getAllFeedbackFormCode,
+          data: resp,
+          message: getAllFeedbackFormMsg,
+          total: totalFeedbackForm,
+        });
+      }
+    } else {
+      const resp = await GenerateFormTable.find({
+        $or: [{ feedbackName: searchRegEx }, { feedback_type: searchRegEx }],
+      })
+        .sort({ _id: -1 })
+        .populate("feedback_parameters")
+        .populate("reviewer")
+        .populate("review")
+        .skip(limit * (pageNumber - 1))
+        .limit(limit)
+        .select("-__v");
+      if (Array.isArray(resp)) {
+        res.status(200).json({
+          code: getAllFeedbackFormCode,
+          data: resp,
+          message: getAllFeedbackFormMsg,
+          total: totalSearchRoles,
+        });
+      }
     }
   } catch (error) {
     console.log("error");
     res.status(400).json(error);
   }
 };
-
-// exports.getAllFeedbackForm = async (req, res) => {
-//   const limit = +req.query.limit;
-//   const pageNumber = +req.query.page;
-//   const searchRegEx = new RegExp(req.query.search, "i");
-//   try {
-//     const totalFeedbackForm = await GenerateFormTable.find().countDocuments();
-//     const totalSearchRoles = await GenerateFormTable.find({
-//       $or: [{ teamName: searchRegEx }, { teamEmail: searchRegEx }],
-//     }).countDocuments();
-//     if (!req.query.search) {
-//       const resp = await GenerateFormTable.find()
-//         .sort({ _id: -1 })
-//         .populate("feedback_parameters")
-//         .populate("reviewer")
-//         .populate("review")
-//         .skip(limit * (pageNumber - 1))
-//         .limit(limit)
-//         .select("-__v");
-//       if (Array.isArray(resp)) {
-//         res.status(200).json({
-//           code: getAllFeedbackFormCode,
-//           data: resp,
-//           message: getAllFeedbackFormMsg,
-//           total: totalFeedbackForm,
-//         });
-//       }
-//     } else {
-//       const resp = await GenerateFormTable.find()
-//         .sort({ _id: -1 })
-//         .populate("feedback_parameters")
-//         .populate("reviewer")
-//         .populate("review")
-//         .skip(limit * (pageNumber - 1))
-//         .limit(limit)
-//         .select("-__v");
-//       if (Array.isArray(resp)) {
-//         res.status(200).json({
-//           code: getAllFeedbackFormCode,
-//           data: resp,
-//           message: getAllFeedbackFormMsg,
-//           total: totalSearchRoles,
-//         });
-//       }
-//     }
-//   } catch (error) {
-//     console.log("error");
-//     res.status(400).json(error);
-//   }
-// };
 
 exports.getSingleFeedbackForm = async (req, res) => {
   const { id } = req.params;
