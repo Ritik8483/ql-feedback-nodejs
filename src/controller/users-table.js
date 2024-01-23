@@ -62,7 +62,7 @@ exports.getAllUsers = async (req, res) => {
         .sort({ _id: -1 })
         .skip(limit * (pageNumber - 1))
         .limit(limit)
-        .select("-__v");
+        .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
         res.status(200).json({
           code: getAllUsersCode,
@@ -78,7 +78,7 @@ exports.getAllUsers = async (req, res) => {
         .sort({ _id: -1 })
         .skip(limit * (pageNumber - 1))
         .limit(limit)
-        .select("-__v");
+        .select("-__v -createdAt -updatedAt");
       if (Array.isArray(resp)) {
         res.status(200).json({
           code: getAllUsersCode,
@@ -97,7 +97,7 @@ exports.getAllUsers = async (req, res) => {
 exports.getSingleUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await UserTable.findById(id).select("-__v");
+    const resp = await UserTable.findById(id).select("-__v -createdAt -updatedAt");
     if (Object.keys(resp).length) {
       res.status(200).json({
         code: getSingleUserCode,

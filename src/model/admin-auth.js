@@ -7,6 +7,6 @@ const adminAuthSchema = new Schema({
   email: { type: String, unique: true },
   password: String,
   token: String,
-});
+}, {timestamps: true});
 
 exports.AdminAuth = mongoose.model("AuthAdminUser", adminAuthSchema); //model(Product) is always singular

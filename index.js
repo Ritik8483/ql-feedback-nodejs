@@ -1,6 +1,5 @@
 //imports
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
@@ -12,6 +11,7 @@ const adminAuthRouters = require("./src/routes/admin-auth");
 const userAuthRouters = require("./src/routes/user-auth");
 const groupParameterRouters = require("./src/routes/group-parameters");
 const sendEmail = require("./src/controller/sendEmail");
+const { authMiddleware } = require("./src/middleware/authMiddleware");
 
 // const adminRouter = require("./src/routes/feedback-parameters");
 
@@ -29,33 +29,13 @@ const { adminAuthTableRouters } = adminAuthRouters;
 const { userAuthTableRouters } = userAuthRouters;
 const { groupParameterRouter } = groupParameterRouters;
 
-//middleware
-const authMiddleware = (req, res, next) => {
-  //method of initializing middleware
-  const token = req.get("Authorization"); //as log contains = Bearer eyJhbGciOiJ
-  try {
-    const decoded = jwt.verify(token, "shhhhh"); //log gives { email: 'vats@gmail.com', iat: 1702471866 }
-    console.log("decoded", decoded);
-    if (decoded.email) {
-      next();
-    } else {
-      res.sendStatus(401);
-    }
-  } catch (error) {
-    res.sendStatus(401);
-    console.log("error", error);
-  }
-};
-
 //API's
 app.post("/send", authMiddleware, sendEmail);
 app.use("/feedback-parameters", authMiddleware, feedbackParameterRouter);
 app.use("/roles", authMiddleware, roleTableRouters);
 app.use("/feedback-form", generateFormRouters);
-app.use("/group-parameters", groupParameterRouter);
-app.use("/users", userTableRouters);
-// app.use("/users", authMiddleware, userTableRouters);
-// app.use("/feedback-form", authMiddleware, generateFormRouters);
+app.use("/group-parameters", authMiddleware, groupParameterRouter);
+app.use("/users", authMiddleware, userTableRouters);
 app.use("/auth", adminAuthTableRouters);
 app.use("/", userAuthTableRouters);
 

@@ -57,7 +57,7 @@ exports.getAllFeedbackForm = async (req, res) => {
         .populate("review")
         .skip(limit * (pageNumber - 1))
         .limit(limit)
-        .select("-__v");
+        .select("-__v -updatedAt");
       if (Array.isArray(resp)) {
         res.status(200).json({
           code: getAllFeedbackFormCode,
@@ -76,7 +76,7 @@ exports.getAllFeedbackForm = async (req, res) => {
         .populate("review")
         .skip(limit * (pageNumber - 1))
         .limit(limit)
-        .select("-__v");
+        .select("-__v -updatedAt");
       if (Array.isArray(resp)) {
         res.status(200).json({
           code: getAllFeedbackFormCode,
@@ -99,7 +99,7 @@ exports.getSingleFeedbackForm = async (req, res) => {
       .populate("feedback_parameters")
       .populate("reviewer")
       .populate("review")
-      .select("-__v");
+      .select("-__v -updatedAt");
     if (Object.keys(resp).length) {
       res.status(200).json({
         code: getSingleFeedbackFormCode,

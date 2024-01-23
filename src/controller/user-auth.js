@@ -1,3 +1,4 @@
+//NOT IN USE
 const userModel = require("../model/user-auth");
 const jwt = require("jsonwebtoken");
 const UserAuth = userModel.UserAuth;
