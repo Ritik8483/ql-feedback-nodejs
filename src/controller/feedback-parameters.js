@@ -3,26 +3,35 @@ const {
   getAllItems,
   getSingleItem,
   updateItem,
-  deleteItem
+  deleteItem,
 } = require("../services/feedback-parameters");
 const { responder } = require("../responder/responder");
+const { validationResult } = require("express-validator");
 
 exports.addFeedbackParameters = async (req, res) => {
-  try {
-    const finalResp = await createItem(req.body);
-    if (finalResp.id) {
-      responder(res, 3001, {});
+  const validationError = validationResult(req);
+  console.log("validationError", validationError);
+
+  if (validationError.isEmpty()) {
+    //means if there is no error
+    try {
+      const finalResp = await createItem(req.body);
+      if (finalResp.id) {
+        responder(res, 3001, {});
+      }
+    } catch (error) {
+      if (error.code === 11000) {
+        console.log("error", error);
+        res.status(400).json({
+          error: `Duplicate key error. ${error.keyValue.feedbackName} feedback name already exists.`,
+        });
+      } else {
+        console.log("error", error);
+        res.status(400).json(error);
+      }
     }
-  } catch (error) {
-    if (error.code === 11000) {
-      console.log("error", error);
-      res.status(400).json({
-        error: `Duplicate key error. ${error.keyValue.feedbackName} feedback name already exists.`,
-      });
-    } else {
-      console.log("error", error);
-      res.status(400).json(error);
-    }
+  } else {
+    res.status(400).json(validationError.array()); //if there is any validation error like feedbackName key or value is missing
   }
 };
 
@@ -31,7 +40,12 @@ exports.getAllFeedbackParameters = async (req, res) => {
   const pageNumber = +req.query.page;
   const searchRegEx = new RegExp(req.query.search, "i");
   try {
-    const resp = await getAllItems(limit, pageNumber, req.query.search, searchRegEx);
+    const resp = await getAllItems(
+      limit,
+      pageNumber,
+      req.query.search,
+      searchRegEx
+    );
     if (Array.isArray(resp.resp)) {
       responder(
         res,
@@ -64,7 +78,7 @@ exports.getSingleFeedbackParameter = async (req, res) => {
 exports.updateFeedbackParameters = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp =await updateItem(id, req.body);
+    const resp = await updateItem(id, req.body);
     if (Object.keys(resp).length) {
       responder(res, 3004, {});
     }
@@ -84,7 +98,7 @@ exports.updateFeedbackParameters = async (req, res) => {
 exports.deleteFeedbackParameters = async (req, res) => {
   const { id } = req.params;
   try {
-    const resp = await deleteItem(id)
+    const resp = await deleteItem(id);
     if (!resp) {
       res.status(400).json({ error: "Feedback Parameter already deleted" });
     } else if (Object.keys(resp).length) {

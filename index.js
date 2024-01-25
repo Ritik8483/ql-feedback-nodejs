@@ -48,6 +48,6 @@ async function main() {
   console.log("moongoose connected");
 }
 //Server Connection
-app.listen(8080, () => {
+app.listen(process.env.PORT, () => {
   console.log("server started");
 });
