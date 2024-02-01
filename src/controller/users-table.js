@@ -8,11 +8,6 @@ exports.addUsers = async (req, res) => {
     const resp = await new UserTable(req.body).save();
     if (resp.id) {
       responder(res, 3006, {});
-      res.status(200).json({
-        code: addUserCode,
-        data: {},
-        message: addUserMsg,
-      });
     }
   } catch (error) {
     console.log("error", error);
