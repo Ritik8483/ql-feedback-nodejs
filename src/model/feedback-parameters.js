@@ -15,7 +15,7 @@ const FeedbackParametersSchema = Schema(
     },
     feedback_parameter_type: {
       type: String,
-      required: [true, "Feedback Description is required"],
+      required: [true, "Feedback Parameter type is required"],
     },
   },
   { timestamps: true }
