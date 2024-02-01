@@ -1,7 +1,8 @@
 const express = require("express");
 const feedbackParametersController = require("../controller/feedback-parameters");
 const feedbackParameterRouter = express.Router();
-const { body } = require("express-validator");
+const { checkSchema } = require("express-validator");
+const { addFeedbackParameterRules } = require("../validations/validation");
 
 const {
   getAllFeedbackParameters,
@@ -14,7 +15,7 @@ const {
 feedbackParameterRouter
   .get("/", getAllFeedbackParameters)
   .get("/:id", getSingleFeedbackParameter)
-  .post("/", body("feedbackName").notEmpty(), addFeedbackParameters)
+  .post("/", checkSchema(addFeedbackParameterRules), addFeedbackParameters)
   .patch("/:id", updateFeedbackParameters)
   .delete("/:id", deleteFeedbackParameters);
 

@@ -35,7 +35,7 @@ app.use("/feedback-parameters", authMiddleware, feedbackParameterRouter);
 app.use("/roles", authMiddleware, roleTableRouters);
 app.use("/feedback-form", generateFormRouters);
 app.use("/group-parameters", authMiddleware, groupParameterRouter);
-app.use("/users", authMiddleware, userTableRouters);
+app.use("/users", userTableRouters);
 app.use("/auth", adminAuthTableRouters);
 app.use("/", userAuthTableRouters);
 

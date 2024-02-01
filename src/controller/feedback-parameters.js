@@ -31,7 +31,7 @@ exports.addFeedbackParameters = async (req, res) => {
       }
     }
   } else {
-    res.status(400).json(validationError.array()); //if there is any validation error like feedbackName key or value is missing
+    res.status(400).json({ error: validationError.array() }); //if there is any validation error like feedbackName key or value is missing
   }
 };
 
