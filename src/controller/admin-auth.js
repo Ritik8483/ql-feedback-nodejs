@@ -15,7 +15,6 @@ exports.createUser = async (req, res) => {
     res.status(201).json(resp);
   } catch (error) {
     res.status(400).json(error);
-    console.log("error");
   }
 };
 
@@ -33,6 +32,5 @@ exports.loginUser = async (req, res) => {
     }
   } catch (error) {
     res.status(401).json(error);
-    console.log("error", error);
   }
 };
