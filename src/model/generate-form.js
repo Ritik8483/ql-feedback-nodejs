@@ -3,7 +3,10 @@ const { Schema } = mongoose;
 
 const GenerateFormSchema = new Schema(
   {
-    feedbackName: String,
+    feedbackName: {
+      type: String,
+      required: [true, "Feedback name is required"],
+    },
     anonymous: Boolean,
     feedback_type: {
       type: String,

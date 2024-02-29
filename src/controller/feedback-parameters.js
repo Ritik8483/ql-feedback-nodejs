@@ -5,13 +5,11 @@ const {
   updateItem,
   deleteItem,
 } = require("../services/feedback-parameters");
-const { responder } = require("../responder/responder");
+const { responder, errorResponder } = require("../responder/responder");
 const { validationResult } = require("express-validator");
 
 exports.addFeedbackParameters = async (req, res) => {
   const validationError = validationResult(req);
-  console.log("validationError", validationError);
-
   if (validationError.isEmpty()) {
     //means if there is no error
     try {
@@ -21,91 +19,104 @@ exports.addFeedbackParameters = async (req, res) => {
       }
     } catch (error) {
       if (error.code === 11000) {
-        console.log("error", error);
-        res.status(400).json({
+        errorResponder(res, {
           error: `Duplicate key error. ${error.keyValue.feedbackName} feedback name already exists.`,
         });
       } else {
-        console.log("error", error);
-        res.status(400).json(error);
+        errorResponder(res, error);
       }
     }
   } else {
-    res.status(400).json({ error: validationError.array() }); //if there is any validation error like feedbackName key or value is missing
+    errorResponder(res, validationError.array()); //if there is any validation error like feedbackName key or value is missing
   }
 };
 
 exports.getAllFeedbackParameters = async (req, res) => {
-  const limit = +req.query.limit;
-  const pageNumber = +req.query.page;
-  const searchRegEx = new RegExp(req.query.search, "i");
-  try {
-    const resp = await getAllItems(
-      limit,
-      pageNumber,
-      req.query.search,
-      searchRegEx
-    );
-    if (Array.isArray(resp.resp)) {
-      responder(
-        res,
-        3002,
-        resp.resp,
-        Object.keys(resp).includes("totalFeedbackParameters")
-          ? resp.totalFeedbackParameters
-          : resp.totalSearchFeedbacks
+  const validationError = validationResult(req);
+  if (validationError.isEmpty()) {
+    const limit = +req.query.limit || 100;
+    const pageNumber = +req.query.page || 1;
+    const searchRegEx = new RegExp(req.query.search, "i");
+    try {
+      const resp = await getAllItems(
+        limit,
+        pageNumber,
+        req.query.search,
+        searchRegEx
       );
+      if (Array.isArray(resp.resp)) {
+        responder(
+          res,
+          3002,
+          resp.resp,
+          Object.keys(resp).includes("totalFeedbackParameters")
+            ? resp.totalFeedbackParameters
+            : resp.totalSearchFeedbacks
+        );
+      }
+    } catch (error) {
+      errorResponder(res, error);
     }
-  } catch (error) {
-    console.log("error");
-    res.status(400).json(error);
+  } else {
+    errorResponder(res, validationError.array());
   }
 };
 
 exports.getSingleFeedbackParameter = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const resp = await getSingleItem(id);
-    if (Object.keys(resp).length) {
-      responder(res, 3003, resp);
+  const validationError = validationResult(req);
+  if (validationError.isEmpty()) {
+    const { id } = req.params;
+    try {
+      const resp = await getSingleItem(id);
+      if (Object.keys(resp).length) {
+        responder(res, 3003, resp);
+      }
+    } catch (error) {
+      errorResponder(res, error);
     }
-  } catch (error) {
-    console.log("error");
-    res.status(400).json(error);
+  } else {
+    errorResponder(res, validationError.array());
   }
 };
 
 exports.updateFeedbackParameters = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const resp = await updateItem(id, req.body);
-    if (Object.keys(resp).length) {
-      responder(res, 3004, {});
+  const validationError = validationResult(req);
+  if (validationError.isEmpty()) {
+    const { id } = req.params;
+    try {
+      const resp = await updateItem(id, req.body);
+      if (Object.keys(resp).length) {
+        responder(res, 3004, {});
+      }
+    } catch (error) {
+      if (error.code === 11000) {
+        errorResponder(res, {
+          error: `Duplicate key error. ${error.keyValue.feedbackName} feedback name already exists.`,
+        });
+      } else {
+        errorResponder(res, error);
+      }
     }
-  } catch (error) {
-    if (error.code === 11000) {
-      console.log("error", error);
-      res.status(400).json({
-        error: `Duplicate key error. ${error.keyValue.feedbackName} feedback name already exists.`,
-      });
-    } else {
-      console.log("error", error);
-      res.status(400).json(error);
-    }
+  } else {
+    errorResponder(res, validationError.array());
   }
 };
 
 exports.deleteFeedbackParameters = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const resp = await deleteItem(id);
-    if (!resp) {
-      res.status(400).json({ error: "Feedback Parameter already deleted" });
-    } else if (Object.keys(resp).length) {
-      responder(res, 3005, {});
+  const validationError = validationResult(req);
+  if (validationError.isEmpty()) {
+    const { id } = req.params;
+    try {
+      const resp = await deleteItem(id);
+      if (!resp) {
+        errorResponder(res, { error: "Feedback Parameter already deleted" });
+      } else if (Object.keys(resp).length) {
+        responder(res, 3005, {});
+      }
+    } catch (error) {
+      errorResponder(res, error);
     }
-  } catch (error) {
-    console.log("error", error);
-    res.status(400).json(error);
+  } else {
+    errorResponder(res, validationError.array());
   }
 };

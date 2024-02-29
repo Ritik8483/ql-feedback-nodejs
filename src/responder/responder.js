@@ -8,3 +8,8 @@ exports.responder = (response, status, data, total) => {
     total: total || undefined,
   });
 };
+
+exports.errorResponder = (response, error) => {
+  response.status(400).json(error);
+  // response.status(400).json({ error: validationError.array() });
+};

@@ -5,8 +5,10 @@ exports.createItem = async (body) => {
 };
 
 exports.getAllItems = async (limit, pageNumber, search, searchRegEx) => {
-  const totalFeedbackParameters =
-    await FeedbackParameter.find().countDocuments();
+  const totalFeedbackParameters = await FeedbackParameter.find()
+    .countDocuments()
+    .skip(limit * (pageNumber - 1))
+    .limit(limit);
   const totalSearchFeedbacks = await FeedbackParameter.find({
     feedbackName: searchRegEx,
   }).countDocuments();
