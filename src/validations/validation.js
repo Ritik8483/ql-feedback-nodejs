@@ -108,11 +108,13 @@ const getAllUsersRules = {
         min: 1,
       },
     },
+    optional: true,
     errorMessage: "page must be a number",
   },
   search: {
     isString: true,
     errorMessage: "search must be a string",
+    optional: true,
   },
 };
 

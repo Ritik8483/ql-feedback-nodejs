@@ -4,28 +4,30 @@ exports.createItem = async (body) => {
   return await FeedbackParameter.create(body);
 };
 
-exports.getAllItems = async (limit, pageNumber, search, searchRegEx) => {
-  const totalFeedbackParameters = await FeedbackParameter.find()
-    .countDocuments()
-    .skip(limit * (pageNumber - 1))
-    .limit(limit);
-  const totalSearchFeedbacks = await FeedbackParameter.find({
-    feedbackName: searchRegEx,
-  }).countDocuments();
-  if (!search) {
-    const resp = await FeedbackParameter.find()
-      .sort({ _id: -1 })
-      .skip(limit * (pageNumber - 1))
-      .limit(limit)
-      .select("-__v -createdAt -updatedAt");
-    return { resp, totalFeedbackParameters };
-  } else {
-    const resp = await FeedbackParameter.find({ feedbackName: searchRegEx })
-      .sort({ _id: -1 })
-      .skip(limit * (pageNumber - 1))
-      .limit(limit)
-      .select("-__v -createdAt -updatedAt");
-    return { resp, totalSearchFeedbacks };
+exports.getAllItems = async (limit, pageNumber, searchRegEx) => {
+  const totalFeedbacks = await FeedbackParameter.aggregate([
+    {
+      $match: {
+        feedbackName: searchRegEx,
+      },
+    },
+    {
+      $count: "feedbacksCount",
+    },
+  ]);
+  const resp = await FeedbackParameter.aggregate([
+    { $sort: { _id: -1 } },
+    {
+      $match: {
+        feedbackName: searchRegEx,
+      },
+    },
+    { $skip: limit * (pageNumber - 1) },
+    { $limit: limit },
+  ]);
+
+  if (Array.isArray(resp)) {
+    return { resp, total: totalFeedbacks[0].feedbacksCount };
   }
 };
 

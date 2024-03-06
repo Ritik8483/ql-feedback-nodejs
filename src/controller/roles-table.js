@@ -34,35 +34,30 @@ exports.getAllRoles = async (req, res) => {
   const validationError = validationResult(req);
   if (validationError.isEmpty()) {
     try {
-      const totalRoles = await RoleTable.find()
-        .countDocuments()
-        .skip(limit * (pageNumber - 1))
-        .limit(limit);
-      const totalSearchRoles = await RoleTable.find({
-        $or: [{ teamName: searchRegEx }, { teamEmail: searchRegEx }],
-      }).countDocuments();
-      if (!req.query.search) {
-        const resp = await RoleTable.find()
-          .sort({ _id: -1 })
-          .populate("teamUsers")
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -createdAt -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3012, resp, totalRoles);
-        }
-      } else {
-        const resp = await RoleTable.find({
-          $or: [{ teamName: searchRegEx }, { teamEmail: searchRegEx }],
-        })
-          .sort({ _id: -1 })
-          .populate("teamUsers")
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -createdAt -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3012, resp, totalSearchRoles);
-        }
+      const totalRoles = await RoleTable.aggregate([
+        {
+          $match: {
+            $or: [{ teamName: searchRegEx }, { teamEmail: searchRegEx }],
+          },
+        },
+        {
+          $count: "rolesCount",
+        },
+      ]);
+      const resp = await RoleTable.aggregate([
+        { $sort: { _id: -1 } },
+        {
+          $match: {
+            $or: [{ teamName: searchRegEx }, { teamEmail: searchRegEx }],
+          },
+        },
+        { $skip: limit * (pageNumber - 1) },
+        { $limit: limit },
+      ]);
+
+      const finalResp = await RoleTable.populate(resp, { path: "teamUsers" });
+      if (Array.isArray(finalResp)) {
+        responder(res, 3012, finalResp, totalRoles[0].rolesCount);
       }
     } catch (error) {
       errorResponder(res, error);

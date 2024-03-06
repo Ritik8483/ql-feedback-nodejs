@@ -38,21 +38,9 @@ exports.getAllFeedbackParameters = async (req, res) => {
     const pageNumber = +req.query.page || 1;
     const searchRegEx = new RegExp(req.query.search, "i");
     try {
-      const resp = await getAllItems(
-        limit,
-        pageNumber,
-        req.query.search,
-        searchRegEx
-      );
+      const resp = await getAllItems(limit, pageNumber, searchRegEx);
       if (Array.isArray(resp.resp)) {
-        responder(
-          res,
-          3002,
-          resp.resp,
-          Object.keys(resp).includes("totalFeedbackParameters")
-            ? resp.totalFeedbackParameters
-            : resp.totalSearchFeedbacks
-        );
+        responder(res, 3002, resp.resp, resp.total);
       }
     } catch (error) {
       errorResponder(res, error);
