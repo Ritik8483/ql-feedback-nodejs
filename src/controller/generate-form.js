@@ -26,39 +26,45 @@ exports.getAllFeedbackForm = async (req, res) => {
   const validationError = validationResult(req);
   if (validationError.isEmpty()) {
     try {
-      const totalFeedbackForm = await GenerateFormTable.find()
-        .countDocuments()
-        .skip(limit * (pageNumber - 1))
-        .limit(limit);
-      const totalSearchRoles = await GenerateFormTable.find({
-        $or: [{ feedbackName: searchRegEx }, { feedback_type: searchRegEx }],
-      }).countDocuments();
-      if (!req.query.search) {
-        const resp = await GenerateFormTable.find()
-          .sort({ _id: -1 })
-          .populate("feedback_parameters")
-          .populate("reviewer")
-          .populate("review")
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3017, resp, totalFeedbackForm);
-        }
-      } else {
-        const resp = await GenerateFormTable.find({
-          $or: [{ feedbackName: searchRegEx }, { feedback_type: searchRegEx }],
-        })
-          .sort({ _id: -1 })
-          .populate("feedback_parameters")
-          .populate("reviewer")
-          .populate("review")
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3017, resp, totalSearchRoles);
-        }
+      const totalGenerateForms = await GenerateFormTable.aggregate([
+        {
+          $match: {
+            $or: [
+              { feedbackName: searchRegEx },
+              { feedback_type: searchRegEx },
+            ],
+          },
+        },
+        {
+          $count: "generateFormsCount",
+        },
+      ]);
+      const resp = await GenerateFormTable.aggregate([
+        { $sort: { _id: -1 } },
+        {
+          $match: {
+            $or: [
+              { feedbackName: searchRegEx },
+              { feedback_type: searchRegEx },
+            ],
+          },
+        },
+        { $skip: limit * (pageNumber - 1) },
+        { $limit: limit },
+      ]);
+
+      const finalResp = await GenerateFormTable.populate(resp, [
+        { path: "feedback_parameters" },
+        { path: "reviewer" },
+        { path: "review" },
+      ]);
+      if (Array.isArray(finalResp)) {
+        responder(
+          res,
+          3017,
+          finalResp,
+          totalGenerateForms[0].generateFormsCount
+        );
       }
     } catch (error) {
       errorResponder(res, error);

@@ -33,35 +33,37 @@ exports.getAllFeedbackGroup = async (req, res) => {
   const validationError = validationResult(req);
   if (validationError.isEmpty()) {
     try {
-      const totalFeedbackParameters = await GroupParameter.find()
-        .countDocuments()
-        .skip(limit * (pageNumber - 1))
-        .limit(limit);
-      const totalSearchFeedbacks = await GroupParameter.find({
-        feedbackGroupName: searchRegEx,
-      }).countDocuments();
-      if (!req.query.search) {
-        const resp = await GroupParameter.find()
-          .populate("groupFeedbacks")
-          .sort({ _id: -1 })
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -createdAt -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3022, resp, totalFeedbackParameters);
-        }
-      } else {
-        const resp = await GroupParameter.find({
-          feedbackGroupName: searchRegEx,
-        })
-          .populate("groupFeedbacks")
-          .sort({ _id: -1 })
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -createdAt -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3022, resp, totalSearchFeedbacks);
-        }
+      const totalGroupParameters = await GroupParameter.aggregate([
+        {
+          $match: {
+            feedbackGroupName: searchRegEx,
+          },
+        },
+        {
+          $count: "groupParametersCount",
+        },
+      ]);
+      const resp = await GroupParameter.aggregate([
+        { $sort: { _id: -1 } },
+        {
+          $match: {
+            feedbackGroupName: searchRegEx,
+          },
+        },
+        { $skip: limit * (pageNumber - 1) },
+        { $limit: limit },
+      ]);
+
+      const finalResp = await GroupParameter.populate(resp, {
+        path: "groupFeedbacks",
+      });
+      if (Array.isArray(finalResp)) {
+        responder(
+          res,
+          3022,
+          finalResp,
+          totalGroupParameters[0].groupParametersCount
+        );
       }
     } catch (error) {
       errorResponder(res, error);

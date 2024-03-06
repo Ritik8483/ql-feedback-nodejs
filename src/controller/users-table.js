@@ -1,7 +1,7 @@
 const UserTableModel = require("../model/users-table");
 const UserTable = UserTableModel.UserTable;
-const { responder } = require("../responder/responder");
-const { validationResult, errorResponder } = require("express-validator");
+const { responder, errorResponder } = require("../responder/responder");
+const { validationResult } = require("express-validator");
 
 exports.addUsers = async (req, res) => {
   const validationError = validationResult(req);
@@ -32,33 +32,28 @@ exports.getAllUsers = async (req, res) => {
   const validationError = validationResult(req);
   if (validationError.isEmpty()) {
     try {
-      const totalUsers = await UserTable.find()
-        .countDocuments()
-        .skip(limit * (pageNumber - 1))
-        .limit(limit);
-      const totalSearchUsers = await UserTable.find({
-        $or: [{ firstName: searchRegEx }, { email: searchRegEx }],
-      }).countDocuments();
-      if (!req.query.search) {
-        const resp = await UserTable.find()
-          .sort({ _id: -1 })
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -createdAt -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3007, resp, totalUsers);
-        }
-      } else {
-        const resp = await UserTable.find({
-          $or: [{ firstName: searchRegEx }, { email: searchRegEx }],
-        })
-          .sort({ _id: -1 })
-          .skip(limit * (pageNumber - 1))
-          .limit(limit)
-          .select("-__v -createdAt -updatedAt");
-        if (Array.isArray(resp)) {
-          responder(res, 3007, resp, totalSearchUsers);
-        }
+      const totalUsers = await UserTable.aggregate([
+        {
+          $match: {
+            $or: [{ firstName: searchRegEx }, { email: searchRegEx }],
+          },
+        },
+        {
+          $count: "userCount",
+        },
+      ]);
+      const resp = await UserTable.aggregate([
+        { $sort: { _id: -1 } },
+        {
+          $match: {
+            $or: [{ firstName: searchRegEx }, { email: searchRegEx }],
+          },
+        },
+        { $skip: limit * (pageNumber - 1) },
+        { $limit: limit },
+      ]);
+      if (Array.isArray(resp)) {
+        responder(res, 3007, resp, totalUsers[0].userCount);
       }
     } catch (error) {
       errorResponder(res, error);
@@ -114,7 +109,7 @@ exports.deleteUsers = async (req, res) => {
   const { id } = req.params;
   const validationError = validationResult(req);
   if (validationError.isEmpty()) {
-    try { 
+    try {
       const resp = await UserTable.findOneAndDelete({ _id: id });
       if (!resp) {
         res.status(400).json({ error: "User already deleted" });
